@@ -36,3 +36,13 @@ print(alumno.values())
 # para hacer asignaciones SI o SI usamos los corchetes y no el método GET, ese solo es para obtener información
 alumno['nacionalidad'] = 'Peruano'
 print(alumno["nacionalidad"])
+
+
+# 1. Quiero saber los hobbies del alumno
+print(alumno['hobbies'])
+
+# 2. Quiero saber el segundo hobbie del alumno (pos 1)
+print(alumno['hobbies'][1])
+
+# 3. Quiero saber el nombre del padre del alumno
+print(alumno['padres']['padre']['nombre'])
