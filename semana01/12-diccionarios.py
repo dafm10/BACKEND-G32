@@ -10,22 +10,16 @@ alumno = {
     "edad": 35,
     "jubilado": False,
     "padres": {
-        "padre": {
-            "nombre": "Alberto",
-            "apellido": "Zegarra"
-        },
-        "madre": {
-            "nombre": "Lucía",
-            "apellido": "Hinojosa"
-        }
-    }
+        "padre": {"nombre": "Alberto", "apellido": "Zegarra"},
+        "madre": {"nombre": "Lucía", "apellido": "Hinojosa"},
+    },
 }
 
 print(alumno["nombre"])
 # Si quiero acceder de forma segura a una de mis llaves
 # si no existe esa llave retornará None (vacío) o el valor que le pongamos como segundo parámetro
 # el método GET sirve para obtener las propiedades o llaves del diccionario
-print(alumno.get("nombres", "No existe")) # retorma em pantalla: NO EXISTE
+print(alumno.get("nombres", "No existe"))  # retorma em pantalla: NO EXISTE
 
 # retorna todas las llaves del diccionario
 print(alumno.keys())
@@ -34,15 +28,15 @@ print(alumno.keys())
 print(alumno.values())
 
 # para hacer asignaciones SI o SI usamos los corchetes y no el método GET, ese solo es para obtener información
-alumno['nacionalidad'] = 'Peruano'
+alumno["nacionalidad"] = "Peruano"
 print(alumno["nacionalidad"])
 
 
 # 1. Quiero saber los hobbies del alumno
-print(alumno['hobbies'])
+print(alumno["hobbies"])
 
 # 2. Quiero saber el segundo hobbie del alumno (pos 1)
-print(alumno['hobbies'][1])
+print(alumno["hobbies"][1])
 
 # 3. Quiero saber el nombre del padre del alumno
-print(alumno['padres']['padre']['nombre'])
+print(alumno["padres"]["padre"]["nombre"])
