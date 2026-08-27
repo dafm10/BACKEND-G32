@@ -16,3 +16,13 @@ while contador < 100:
     if contador == 10:
         break
     contador += 1
+
+# continue > salta esa iteración, pero las demás continuan
+
+print("---------------------------")
+contador = 0
+while contador < 10:
+    contador += 1
+    if contador == 7:
+        continue
+    print(contador)
