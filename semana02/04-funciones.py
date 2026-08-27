@@ -46,3 +46,10 @@ print(presentacion("Lucha", 25, "Jaén"))
 
 # Si queremos modificar el orden de los parámetros
 print(presentacion(ciudad="Cuzco", nombre="Rouse", edad=33))
+
+
+def sumar(num1, num2):
+    print(num1 + num2)
+
+resultado = sumar(10,5)
+print(resultado)
