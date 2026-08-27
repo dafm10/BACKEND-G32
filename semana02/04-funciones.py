@@ -34,3 +34,15 @@ def saludo_personalizado(nombre: str):
     return f"Bienvenido {nombre}"
 
 print(saludo_personalizado("David"))
+
+
+def presentacion(nombre: str, edad: int, ciudad: str):
+    return f"Hola, me llamo {nombre}, tengo {edad} años y soy de {ciudad}"
+
+# El orden que le pongamos a los parámetros IMPORTA
+print(presentacion("David", 38, "Trujillo"))
+print(presentacion("Pepe", 50, "Lima"))
+print(presentacion("Lucha", 25, "Jaén"))
+
+# Si queremos modificar el orden de los parámetros
+print(presentacion(ciudad="Cuzco", nombre="Rouse", edad=33))
