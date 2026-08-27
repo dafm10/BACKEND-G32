@@ -25,3 +25,12 @@ def obtener_tipo_cambio():
 resultado = obtener_tipo_cambio()
 
 print(resultado)
+
+# Podemos pasar parámetros sin indicar el tipo de dato, PERO en las últimas versiones se puede indicar el tipo pero no es restringido
+# declarar el tipo de dato, nos ayuda a documentar mejor nuestro proyecto
+def saludo_personalizado(nombre: str):
+    """Funcion que sirve para devolver un saludo en bae al nombre"""
+    # DOCUMENTACIÓN DE LAS FUNCIONES > esto va siempre al comienzo
+    return f"Bienvenido {nombre}"
+
+print(saludo_personalizado("David"))
