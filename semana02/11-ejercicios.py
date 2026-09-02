@@ -70,8 +70,6 @@ print(f"{calcular_area_circulo(10):.2f}")
 
 
 # 6. Crear una función procesar_notas(nombre, *notas) que calcule y retorne el promedio y luego clasigique el resultado con if-elif-else en una segunda función clasificar(promedio)
-
-
 # el * indica que se le va a pasar parámetros infinitos y se crea en una TUPLA (ordenada y no editable)
 
 def clasificar(promedio):
