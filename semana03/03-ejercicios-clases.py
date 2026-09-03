@@ -52,27 +52,19 @@ print(car.productos)
 
 
 class Sesion:
-    def __init__(self, usuario):
+    def __init__(self, usuario, active = False):
         self.usuario = usuario
-        self.activa = False
+        self.active = active
 
     def iniciar_sesion(self):
-        if self.usuario != "":
-            self.activa = True
-        else:
-            self.activa = False
-
+        self.active = True
+        
     def verificar_acceso(self):
-        if self.activa == True:
-            return "Acceso permitido"
-        else:
-            return "Acceso denegado"
+        resultado = "Acceso Permitido" if self.active else "Acceso Denegado"
+        print(resultado)
 
     def cerrar_sesion(self):
-        if self.activa == True:
-            self.activa = False
-        else:
-            return "No has ingresado sesión aún"
+        self.active = False
 
 sesion = Sesion("dave")
 sesion.iniciar_sesion()
