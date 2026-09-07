@@ -19,3 +19,33 @@ CREATE DATABASE pruebas;
 
 -- Cuando utilizamos un comando de PSQL no estamos obligados a poner ";", es opcional
 \c pruebas
+
+-- Sirve para ejecutar cualquier comando de la termina fuera de postgres
+-- Limpiaremos la terminal
+\! clear
+\! cls
+
+-- Creamos una tabla
+CREATE TABLE PERSONAS (
+    -- Ahora definimos las columnas que contendrá la tabla
+    -- nombre_columna tipo_de_Dato opciones_adicionales
+    id SERIAL PRIMARY KEY, -- Solmanete debe existir una columna SERIAL en toda la tabla
+    -- UNIQUE > Indica que un registro no pueda tener el mismo valor de otro registro
+    -- NOT NULL > Indica que la columna jamás podrá tener valores nulos
+    -- NULL > Si podrá tener valores nulos (configuración por defecto)
+    -- PRIMARY KEY > Indica que la columan será escogida como representación del registro y se usará para encontrar el registro más rápido, acá generalmente suelen ser los ID's
+    -- DEFAULT valor > Indica que al momento de registrar o actualizar el valor de la columna, si no se ingresa nada se pondrá el valor con valor predeterminado.
+    nombre TEXT NOT NULL, -- TEXT no tiene límites, es decir podemos almacenar grandes cantidades de texto y este variará su almacenamiento en base al texto almacenado.
+    apellido VARCHAR(50), -- VARCHAR es variado en almacenamiento
+    correo TEXT NOT NULL UNIQUE,
+    fecha_nacimiento TIMESTAMP WITH TIME ZONE
+);
+
+-- Para ver las tablas creadas en la BD
+\dt
+
+-- Para ver las tablas y las secuenciales (autoincrementables) creadas en la base de datos
+\d
+
+-- Nos mostrará la definición de toda la configuración de esa table y en la parte de abajo mostrará sus indices
+\d NOMBRE_TABLA
