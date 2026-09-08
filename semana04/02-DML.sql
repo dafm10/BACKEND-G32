@@ -38,3 +38,24 @@ ALTER TABLE personas ALTER COLUMN sexo TYPE INT USING sexo::INT;
 
 -- Renombrar la columna
 ALTER TABLE personas RENAME COLUMN sexo TO peso;
+
+
+-- ============================================= FIN ALTER ===================================
+
+-- SELECT (Visualizar los datos)
+-- SELECT nombre_col1, nombre_col2, ... FROM tabla;
+-- Ahora si queremos visualizar TODAS las columnas de la consulta
+-- SELECT * FROM tabla;
+
+SELECT nombre FROM personas;
+
+SELECT * FROM personas;
+
+-- Se le puede agregar condicionales para que los registros que cumplan esa condición sean mostrados
+
+SELECT * FROM personas WHERE id > 2;
+
+SELECT * FROM personas WHERE id > 2 AND nombre = 'Rodrigo' OR nombre ='Marge';
+
+
+SELECT * FROM personas WHERE id > 2 AND nombre = 'rodrigo' OR nombre ='Marge';
