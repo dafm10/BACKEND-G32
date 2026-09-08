@@ -106,7 +106,7 @@ class ProductoImportado(Producto):
 productos = [Producto("Cuaderno", 5), ProductoConDescuento("Mochila", 20, 15), ProductoImportado("Laptop", 300, 18)]
 
 for producto in productos:
-    producto = 500
+    producto.precio = 500
 
 productos[0].vender(10) # Imprimir venta inválida
 productos[1].vender(5) # Venta válida
