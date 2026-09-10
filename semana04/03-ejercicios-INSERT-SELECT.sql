@@ -9,7 +9,15 @@
 -- activo BOOLEAN DEFAULT TRUE
 
 CREATE DATABASE tienda;
-CREATE TABLE productos (id SERIAL PRIMARY KEY, nombre TEXT NOT NULL, categoria VARCHAR(40), precio NUMERIC(4, 2), stock INT, activo BOOLEAN DEFAULT TRUE);
+\c tienda
+CREATE TABLE productos (
+    id SERIAL PRIMARY KEY, 
+    nombre TEXT NOT NULL, 
+    categoria VARCHAR(40), 
+    precio FLOAT(2), 
+    stock INT, 
+    activo BOOLEAN DEFAULT TRUE
+);
 
 -- Insertar los datos
 INSERT INTO productos (nombre, categoria, precio, stock, activo)
@@ -50,7 +58,10 @@ SELECT * FROM productos WHERE precio_soles BETWEEN 5 AND 15 AND nombre_producto 
 
 -- 8. Mostrar los productos cuya categoría no sea 'limpieza'
 SELECT * FROM productos WHERE categoria != 'Limpieza';
+SELECT * FROM productos WHERE categoria <> 'Limpieza';
 
 -- OPCIONAL
 -- 9. Mostrar los productos que no estén activos
-SELECT * FROM productos WHERE activo = TRUE;
+SELECT * FROM productos WHERE activo IS FALSE;
+SELECT * FROM productos WHERE activo = FALSE;
+SELECT * FROM productos WHERE activo = 'f';
