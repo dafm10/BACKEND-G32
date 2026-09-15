@@ -30,4 +30,20 @@ SELECT categoria, MAX(precio) FROM productos WHERE activo = TRUE GROUP BY catego
 
 
 -- Si queremos usar una funciín de agregación para condicionales, entonces usamos la clausula HAVING.
-SELECT categoria, SUM(stock) AS suma FROM productos WHERE activo = true GROUP BY categoria HAVING SUM(stock) >= 40 ORDER BY SUM(stock) DESC, categoria DESC;
+SELECT categoria, SUM(stock) AS suma 
+FROM productos 
+WHERE activo = true 
+GROUP BY categoria 
+HAVING SUM(stock) >= 40 
+ORDER BY SUM(stock) DESC, categoria DESC;
+
+
+-- ASC > 0 - 9 | A - Z
+-- DESC > 9 - 0 | Z - A
+
+-- SELECT
+-- FROM
+-- WHERE
+-- GROUP BY
+-- HAVING
+-- ORDER BY
