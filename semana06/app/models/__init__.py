@@ -3,3 +3,5 @@ from .usuarios import Usuario
 from .categorias import Categoria
 from .libros import Libros
 from .escritores import Escritor, EstadoEscritor
+from .libros_categorias import LibroCategoria
+from .libros_escritores import LibroEscritor
