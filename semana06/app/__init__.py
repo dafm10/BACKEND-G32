@@ -1,5 +1,6 @@
 from flask import Flask
 from .config import config_map
+from .models import *
 from .extensions import db, migrate
 
 # Al usar el patron de diseño Application Factory se recomienda crear una función llamada: create_app, en la cual se inicializará todo el proyecto y así mismo puede recibir parámetros para los diferentes entornos de prueba
