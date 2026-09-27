@@ -1,7 +1,7 @@
 from app.extensions import db
 from sqlalchemy import Column, types
 
-class Libros(db.Model):
+class Libro(db.Model):
     __tablename__ = 'libros'
     id = Column(type_=types.Integer, autoincrement=True, primary_key=True)
     nombre = Column(type_=types.Text, nullable=False)

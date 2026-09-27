@@ -1,7 +1,7 @@
 # Este será el archivo raiz del proyecto en el cual se usará para exportar todo lo necesario que pueda ser accedido dentro de esta carpeta
 from .usuarios import Usuario
 from .categorias import Categoria
-from .libros import Libros
+from .libros import Libro
 from .escritores import Escritor, EstadoEscritor
 from .libros_categorias import LibroCategoria
 from .libros_escritores import LibroEscritor
