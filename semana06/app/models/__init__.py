@@ -5,3 +5,5 @@ from .libros import Libros
 from .escritores import Escritor, EstadoEscritor
 from .libros_categorias import LibroCategoria
 from .libros_escritores import LibroEscritor
+from .ejemplares import Ejemplar
+from .prestamos import Prestamo
