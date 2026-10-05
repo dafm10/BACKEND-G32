@@ -1,5 +1,4 @@
 from flask_restful import Resource, request
-from app.schemas import LibroSchema
 from pydantic import ValidationError, TypeAdapter
 from datetime import datetime
 from app.models import Libro
@@ -8,8 +7,12 @@ from app.schemas import LibroSchema
 
 class LibrosController(Resource):
     def get(self):
+        # Así obtengo los query params enviados por el cliente
+        print(request.args)
+        pagina = request.args.get('page')
+        porPagina = request.args.get('perPage')
+        
         libros = db.session.query(Libro).filter(Libro.eliminado == False).all() # obtenemos todos los libros
-
         adapter_libros = TypeAdapter(list[LibroSchema])
         resultado = adapter_libros.validate_python(libros)
         
