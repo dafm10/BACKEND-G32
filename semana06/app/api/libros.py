@@ -1,8 +1,10 @@
 from flask_restful import Resource, request
 from app.schemas import LibroSchema
 from pydantic import ValidationError, TypeAdapter
+from datetime import datetime
 from app.models import Libro
 from app.extensions import db
+from app.schemas import LibroSchema
 
 class LibrosController(Resource):
     def get(self):
@@ -70,4 +72,40 @@ class LibroController(Resource):
 
         return {
             "message": "Libro elimnado exitosamente"
+        }
+
+    def get(self, id):
+        libroEncontrado = db.session.query(Libro).filter(Libro.id == id).first()
+
+        if not libroEncontrado:
+            return {
+                "message": "El libro no existe"
+            }, 404
+
+        # Gracias al relationship creado en LibroCategoria se crea el atributo virtual en la clase de Libro con el nombre colocado en el parámetro backref y cuando ingreso a este parámetro podré obtener todas sus libroCategorias pertenecientes a este libro y del mismo modo podré acceder a la categoría a la que pertenece gracias al relationship, en este caso sería categorías
+        
+        # print(libroEncontrado.libro_categorias)
+        # print(libroEncontrado.libro_categorias[0].categoria.nombre)
+
+        categorias = []
+
+        for libroCategoria in libroEncontrado.libro_categorias:
+            categorias.append({
+                "id": libroCategoria.categoria.id,
+                "nombre": libroCategoria.categoria.nombre
+            })
+
+        resultado = {
+            "id": libroEncontrado.id,
+            "nombre": libroEncontrado.nombre,
+            # strftime > convierte una fecha a un string usando el patrón definido
+            # a diferencia de strptime > convierte un string a una fecha usando el patrón de lectura
+            "fechaPublicacion": datetime.strftime(libroEncontrado.fechaPublicacion, "%Y-%m-%d %H:%M:%S") if libroEncontrado.fechaPublicacion else None,
+            "prologo": libroEncontrado.prologo,
+            "isbn": libroEncontrado.isbn,
+            "categorias": categorias
+        }
+
+        return {
+            'content': resultado
         }

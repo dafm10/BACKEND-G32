@@ -21,5 +21,5 @@ class LibroCategoria(db.Model):
     # Relationships
     # es la relación pero a nivel del ORM, es decir, esto no afecta en la BD pero me sirve para poder acceder a los datos desde una entidad (libros) hacia sus libros categoria
     # El relationship, creará un atributo en tiempo de ejecución para poder acceder desde la instancia del libro hacia todos sus libro_categorias
-    libros = relationship('Libro', backref='libro_categoria')
-    categorias = relationship('Categoria', backref='libro_categoria')
+    libro = relationship('Libro', backref='libro_categorias')
+    categoria = relationship('Categoria', backref='libro_categorias')
