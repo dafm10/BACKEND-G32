@@ -1,9 +1,13 @@
 from flask_restful import Resource, request
 from app.extensions import db
-from app.schemas import RegistroUsuarioSchema, LoginUsuarioSchema
+from app.schemas import RegistroUsuarioSchema, LoginUsuarioSchema, UsuarioSchema
 from app.models import Usuario
 from pydantic import ValidationError
 from bcrypt import gensalt, hashpw, checkpw
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from jwt import encode
+# from os import getenv
+from datetime import timedelta
 
 class RegistroController(Resource):
     def post(self):
@@ -81,8 +85,13 @@ class LoginController(Resource):
             esLaPassword = checkpw(password,hashedPassword)
 
             if esLaPassword:
+                # encode({"id": usuarioEncontrado.id}, getenv('JWT_KEY'))
+                jwt = create_access_token(identity=usuarioEncontrado.id, # Es el identificador de la jwt, a quien le pertenece
+                                    # para mantener la sesión activa y mantenga la token, en este caso es solo token de acceso
+                                    fresh=False,  # Si queremos que esta JWT sea usada como un refresh jwt
+                                    expires_delta=timedelta(hours=8, minutes=5)) # Indica la duración que tendrá de validez la JWT
                 return {
-                    'message': 'Bienvenido'
+                    'content': jwt
                 }
             else:
                 return {
@@ -94,3 +103,17 @@ class LoginController(Resource):
                 'message':'Error al hacer el login',
                 'content':error.errors(include_context=False)
             }
+
+class UsuarioController(Resource):
+    @jwt_required() # Sirve para indicar que el método que va a tratar de acceder tenga de manera OBLIGATORIA la JWT si no será rechazado
+    def get(self):
+        id = get_jwt_identity() # Devolvrá el identificador de la JWT, es decir el valor contenido en JTI dentro del playload
+
+        usuarioEncontrado = db.session.query(Usuario).filter(Usuario.id == id).first()
+
+        # Pasamos la instancia del usuario encontrado y con model_dump devuelve el diccionario en formato json
+        resultado =  UsuarioSchema.model_validate(usuarioEncontrado).model_dump(mode='json')
+
+        return {
+            'content': resultado
+        }
