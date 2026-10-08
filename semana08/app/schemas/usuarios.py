@@ -4,7 +4,7 @@ from re import search
 class RegistroUsuarioSchema(BaseModel):
     # EmailStr > valida que el texto tenga el formato nombre@dominio.com
     correo:EmailStr = Field(max_length=100)
-    password:str = Field(min_length=8, max_length=128)
+    password:str = Field(max_length=128)
     nombre:str = Field(min_length=1)
     apellido:str | None = Field(default=None)
 
@@ -16,6 +16,9 @@ class RegistroUsuarioSchema(BaseModel):
     def validarPassword(cls, valor):
         errores = []
 
+        if len(valor)<8:
+            errores.append("El password no debe ser menor a 8 caracteres")
+
         # Expresiones Regulares (ReGex) es una forma de validar si un texto cumple o no con determinadas reglas sin importar su contenido, es decir: al menos una mayúscula, al menos una minúscula, al menos un número, al menos unn caracter especial
         if not search(r"[A-Z]", valor):
             errores.append("Falta una mayúscula")
@@ -25,13 +28,18 @@ class RegistroUsuarioSchema(BaseModel):
 
         # También se puede utilizar r"[0.9]"
         if not search(r"\d", valor):
-            errores.__add__("Falta un número")
+            errores.append("Falta un número")
 
         if not search(r"[^A-Za-z0-9]", valor):
             errores.append("Falta un caracter especial")
 
         if errores:
             print(errores)
-            raise ValueError("El password requiere: ".join(errores))
+            raise ValueError(", ".join(errores))
 
         return valor
+
+
+class LoginUsuarioSchema(BaseModel):
+    correo: EmailStr
+    password: str
