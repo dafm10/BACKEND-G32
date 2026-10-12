@@ -1,13 +1,16 @@
 from flask_restful import Resource, request
 from app.extensions import db
-from app.schemas import RegistroUsuarioSchema, LoginUsuarioSchema, UsuarioSchema
+from app.schemas import RegistroUsuarioSchema, LoginUsuarioSchema, UsuarioSchema, ResetPasswordSchema, ChangePasswordSchema
 from app.models import Usuario
 from pydantic import ValidationError
 from bcrypt import gensalt, hashpw, checkpw
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from jwt import encode
 # from os import getenv
-from datetime import timedelta
+from datetime import timedelta, datetime
+from cryptography import fernet
+from os import getenv
+from json import dumps
 
 class RegistroController(Resource):
     def post(self):
@@ -117,3 +120,72 @@ class UsuarioController(Resource):
         return {
             'content': resultado
         }
+
+class ChangePasswordController(Resource):
+    @jwt_required()
+    def post(self):
+        try:
+            id = get_jwt_identity()
+            dataValidada = ChangePasswordSchema.model_validate(request.get_json())
+            usuarioEncontrado = db.session.query(Usuario).filter(Usuario.id == id).first()
+            hashPassword = usuarioEncontrado.password.encode()
+            passwordActual = dataValidada.passwordActual.encode()
+            
+            if not checkpw(passwordActual, hashPassword):
+                return {
+                    'message':'La password actual no es la correcta'
+                }, 403 # Forbidden (no tiene los permisos necesario para realizar la acción)
+
+            salt = gensalt()
+            nuevaPassword = dataValidada.nuevaPassword.encode()
+            # Ahora si creo mi nuevo hash de la nueva password
+            nuevaPasswordHasheada = hashpw(nuevaPassword, salt).decode()
+
+            usuarioEncontrado.password = nuevaPasswordHasheada
+            db.session.commit()
+            
+            return {
+                'message':'Password cambiada exitosamente'
+            }
+        except ValidationError as error:
+            return{
+                'meesage':'Error el cambiar la password',
+                'content': error.errors(include_context=False)
+            },400
+
+class ResetPasswordController(Resource):
+    def post(self):
+        try:
+            dataValidada = ResetPasswordSchema.model_validate(request.get_json())
+            # Primero validamos que exista el usuario en la base de datps
+            usuarioEncontrado = db.session.query(Usuario).filter(Usuario.correo == dataValidada.correo).first()
+            if not usuarioEncontrado:
+                return {
+                    'message': 'Usuario no existe en el sistema'
+                }, 400
+
+            # genera una llave
+            # key =  fernet.Fernet.generate_key()
+            # print(key)
+
+            # Comenzamos iniciando Fernet con nuestra llave
+            encriptador = fernet.Fernet(getenv('FERNET_KEY'))
+            horaActual = datetime.now()
+            # A la hora actual le incrementamos media hora
+            fechaVencimiento = horaActual + timedelta(minutes=30)
+            data = {
+                "usuarioId": str(usuarioEncontrado.id),
+                "vence": fechaVencimiento.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            # Ahora convertimos el dicr a un json
+            dataConvertida = dumps(data).encode()
+            dataEncriptada = encriptador.encrypt(dataConvertida)
+            print(dataEncriptada)
+            return {
+                'message': 'Se envió el correo para la restauración'
+            }
+        except ValidationError as error:
+            return {
+                'message': 'Error al resetear la password',
+                'content':error.errors(include_context=False)
+            }
