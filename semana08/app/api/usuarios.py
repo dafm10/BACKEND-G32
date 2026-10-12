@@ -11,6 +11,7 @@ from datetime import timedelta, datetime
 from cryptography import fernet
 from os import getenv
 from json import dumps
+from app.util import enviar_correo
 
 class RegistroController(Resource):
     def post(self):
@@ -173,14 +174,24 @@ class ResetPasswordController(Resource):
             horaActual = datetime.now()
             # A la hora actual le incrementamos media hora
             fechaVencimiento = horaActual + timedelta(minutes=30)
+            
             data = {
                 "usuarioId": str(usuarioEncontrado.id),
                 "vence": fechaVencimiento.strftime("%Y-%m-%d %H:%M:%S")
             }
+
             # Ahora convertimos el dicr a un json
             dataConvertida = dumps(data).encode()
             dataEncriptada = encriptador.encrypt(dataConvertida)
-            print(dataEncriptada)
+
+            cuerpo = f"""
+<h1>Hola! </h1>
+<p>Haz solicitado restaurar tu password, para hacerlo haz click en el siguiente enlace: {dataEncriptada.decode()}. </br>
+Si no has sido tu, haz caso omiso a este correo. </p>
+"""
+
+            enviar_correo(usuarioEncontrado.correo,"Resetear password", cuerpo)
+            
             return {
                 'message': 'Se envió el correo para la restauración'
             }
