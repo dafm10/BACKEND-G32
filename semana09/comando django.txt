@@ -1,0 +1,21 @@
+django-admin startproject NOMBRE_PROYECTO   > Crea un nuevo proyecto con el nombre que le coloquemos y este servirá para que funcione Django
+python3 manage.py runserver                 > levanta el proyecto de Django en modo de desarrollo, y creará un archivo: db.sqlite3
+python3 manage.py migrate                   > Ejecuta las migraciones faltantes en la base de datos
+python3 manage.py showmigrations            > Muestra todas las migraciones que hay en el proyecto y las que están en la BD [X]
+
+
+
+- manage.py   > para ejecutar otros comandos de tareas administrativas
+    main()  > trata de encontrar la libería de django, si no la encuentra lanza un error, valida si django está instalado
+
+
+- dentro de la carpeta del proyecto, en este caso: recetario, no se toca nada ni crear nada.
+    asgi.py 
+    wsgi.py > usa gunicorn
+    - Django permite ser desplegado en 2 servidores
+    - tienen el mismo contenido
+
+    settings.py > son puras variables, sirve para configurar todas las variables que django necesita para poder funcionar
+    - INSTALLED_APPS    > Lista todos los modulos pre-instalados como: admin, auth, contenttypes, sessiones, messages, staticfiles
+    urls.py     > guarda todas las rutas para el proyecto
+    - Tiene una ruta inicial "admin" para el panel administrativo del proyecto
