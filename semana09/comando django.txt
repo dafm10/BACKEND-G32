@@ -2,8 +2,8 @@ django-admin startproject NOMBRE_PROYECTO   > Crea un nuevo proyecto con el nomb
 python3 manage.py runserver                 > levanta el proyecto de Django en modo de desarrollo, y creará un archivo: db.sqlite3
 python3 manage.py migrate                   > Ejecuta las migraciones faltantes en la base de datos
 python3 manage.py showmigrations            > Muestra todas las migraciones que hay en el proyecto y las que están en la BD [X]
-
-
+python3 manage.py startapp NOMBRE_APP       > Crea una nueva aplicación dentro del proyecto en la terminal
+ython3 manage.py makemigrations NOMBRE_APP --name NOMBRE_MIGRACION > Crea una nueva migración en base a todos los cambios que hay en esa App
 
 - manage.py   > para ejecutar otros comandos de tareas administrativas
     main()  > trata de encontrar la libería de django, si no la encuentra lanza un error, valida si django está instalado
