@@ -4,6 +4,8 @@ python3 manage.py migrate                   > Ejecuta las migraciones faltantes 
 python3 manage.py showmigrations            > Muestra todas las migraciones que hay en el proyecto y las que están en la BD [X]
 python3 manage.py startapp NOMBRE_APP       > Crea una nueva aplicación dentro del proyecto en la terminal
 ython3 manage.py makemigrations NOMBRE_APP --name NOMBRE_MIGRACION > Crea una nueva migración en base a todos los cambios que hay en esa App
+python3 manage.py sqlmigrate NOMBRE_APP "NUMERO_MIGRACION"   > Muestra el script SQL que se va a ejecutar en la base de datos a raiz de la migración
+python3 manage.py createsuperuser           > Crea un super usuario para el acceso al panel admin de django
 
 - manage.py   > para ejecutar otros comandos de tareas administrativas
     main()  > trata de encontrar la libería de django, si no la encuentra lanza un error, valida si django está instalado
@@ -19,3 +21,9 @@ ython3 manage.py makemigrations NOMBRE_APP --name NOMBRE_MIGRACION > Crea una nu
     - INSTALLED_APPS    > Lista todos los modulos pre-instalados como: admin, auth, contenttypes, sessiones, messages, staticfiles
     urls.py     > guarda todas las rutas para el proyecto
     - Tiene una ruta inicial "admin" para el panel administrativo del proyecto
+
+
+SCRIPTS SQL
+- Ver los permisos asignados
+SELECT AG.name, AP.name FROM auth_group_permissions AGP INNER JOIN auth_permission AP ON AGP.permission_id = AP.id INNER JOIN auth_group AG ON AGP.group_id = AG.id;
+

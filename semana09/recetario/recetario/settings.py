@@ -109,8 +109,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
+# Esto sirve únicamente para modificar el idioma que será mostrado en el panel administrativo
+LANGUAGE_CODE = "es"
 
 TIME_ZONE = "UTC"
 
