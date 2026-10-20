@@ -8,6 +8,7 @@ class IngredienteAdmin(admin.ModelAdmin):
     # Cuando se quiere buscar una FK no se puede declarar directamente si no que se tiene que usar su referencia al modelo adyacente
     # Al momento de referenciar al modelo de la FK se pone el nombre de la FK y luego el doble sub guión y luego el nombre de la columna que queremos buscar
     search_fields = ["descripcion", "recetaId__titulo"]
+    readonly_fields = ["id"]
 
 @admin.register(Receta)
 class RecetaAdmin(admin.ModelAdmin):
@@ -26,4 +27,5 @@ class RecetaAdmin(admin.ModelAdmin):
 
 @admin.register(Preparacion)
 class PreparacionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ["id", "descripcion", "recetaId"]
+    readonly_fields = ["id"]
