@@ -4,6 +4,8 @@ from uuid import uuid4
 class Categoria(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     nombre = models.CharField(max_length=100, null=False)
+    habilitado = models.BooleanField(default=True)
+    eliminado = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'categorias'
@@ -15,6 +17,8 @@ class Media(models.Model):
     ruta = models.CharField(max_length=200, null=False)
     # mime_type = models.CharField(max_length=100, null=False)
     mimeType = models.CharField(max_length=100, null=False, db_column='mime_type')
+    habilitado = models.BooleanField(default=True)
+    eliminado = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'medias'
@@ -23,6 +27,8 @@ class Producto(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     nombre = models.CharField(max_length=100, null=False)
     disponible = models.BooleanField(default=True)
+    habilitado = models.BooleanField(default=True)
+    eliminado = models.BooleanField(default=False)
     
     media = models.ForeignKey(to=Media, on_delete=models.PROTECT, db_column='media_id')
     categoria = models.ForeignKey(to=Categoria, on_delete=models.PROTECT, db_column='categoria_id')
@@ -35,6 +41,8 @@ class Precio(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     disponible = models.BooleanField(null=False)
+    habilitado = models.BooleanField(default=True)
+    eliminado = models.BooleanField(default=False)
 
     producto = models.ForeignKey(to=Producto, on_delete=models.PROTECT, db_column='producto_id')
 
