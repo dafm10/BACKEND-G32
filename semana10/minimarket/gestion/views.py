@@ -15,7 +15,7 @@ from rest_framework.generics import (CreateAPIView, # crear
                                      UpdateAPIView) # actualizar
 from rest_framework.viewsets import ViewSet
 from .models import Categoria, Producto
-from .serializers import CategoriaSerializer, ProductoSerializer
+from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer
 from uuid import UUID
 
 class CategoriasView(APIView):
@@ -155,7 +155,8 @@ class ProductosView(ViewSet):
             "eliminado": False
         }
         if categoria:
-            filtros["categoria"] = []
+            # https://docs.djangoproject.com/en/6.1/ref/models/querysets/#field-lookups
+            filtros["categoria__in"] = []
 
             for categoriaId in categoria:
                 # Acá hacemos la validación si el id de la categoría es UUID válido, para evitar algún error pero del lado de la BD
@@ -168,27 +169,51 @@ class ProductosView(ViewSet):
                 
                 categoriaEncontrada = Categoria.objects.filter(id = categoriaId, eliminado = False).first()
                 if categoriaEncontrada:
-                    filtros["categoria"].append(str(categoriaEncontrada.id))
+                    filtros["categoria__in"].append(str(categoriaEncontrada.id))
+            
+            # Validamos que si al final todas las categorías enviadas no existen entonces no agregamos ese filtro a la variable
+            if len(filtros["categoria__in"]) == 0:
+                del filtros["categoria__in"]
 
         if nombre:
             # en SQL al usar el % en una búsqueda de LIKE o ILIKE estamos indicando que nos interesa que caracteres vienen antes o vienen despupés
-            filtros["nombre"] = '%'+nombre+'%' # la sumatoria cuando son string se vuelve concatenación
+            # icontains > es en SQL un ILIKE
+            filtros["nombre__icontains"] = nombre
 
         print(filtros)
-        productos = Producto.objects.filter(eliminado = False).all()
+        # al usar el ** en un método y ese sea un diccionario estos indican que las llaves del diccionario se convierten a parámetro y sus valores se convertirán a valores de los parámetros, es decir data= {"nombre": "Eduardo"} > **data > (nombre="Eduardo")
+        productos = Producto.objects.filter(**filtros).all()
         serializador = ProductoSerializer(instance=productos, many=True)
         return Response(data = {
             "content": serializador.data
         })
 
-    # def destroy(self, request, id):
-    #     productoEncontrado = Producto.objects.filter(eliminado = False, id = id).first()
-    #     if not productoEncontrado:
-    #         return Response(data={
-    #             "message": "Producto no encontrado"
-    #         }, status=status.HTTP_404_NOT_FOUND)
 
-    #     productoEncontrado.eliminado = True
-    #     productoEncontrado.save()
+class ProductoView(ViewSet):
+    def retrieve(self, request: Request, id):
+        productoEncontrado = Producto.objects.filter(id = id, eliminado = False).first()
+        if not productoEncontrado:
+            return Response(data={
+                "message": "Producto no existe"
+            }, status=status.HTTP_404_NOT_FOUND)
 
-    #     return Response(data=None, status=status.HTTP_204_NO_CONTENT)
+        
+        serializador = ProductoDetalleSerializer(instance = productoEncontrado)
+
+        return Response(data={
+            "content": serializador.data
+        })
+
+    def destroy(self, request: Request, id):
+        productoEncontrado = Producto.objects.filter(id = id, eliminado = False).first()
+        
+        if not productoEncontrado:
+            return Response(data={
+                "message": "Producto no existe"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Realizamos el soft-delete cambiando el estado del eliminado del producto a True y lo guardamos en la BD
+        productoEncontrado.eliminado = True
+        productoEncontrado.save()
+
+        return Response(data=None, status=status.HTTP_204_NO_CONTENT)

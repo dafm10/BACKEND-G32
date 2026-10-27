@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CategoriasView, DevolverActualizarEliminarCategoriaView, ProductosView
+from .views import CategoriasView, DevolverActualizarEliminarCategoriaView, ProductosView, ProductoView
 
 urlpatterns = [
     # as_view convierte la vista creada con DRF a una vista que la pueda entender Django y pueda servirla
@@ -9,7 +9,10 @@ urlpatterns = [
     # En las viewSet se tiene que enlazar los verbos http (GET, POST, PUT, DELETE) con los métodos declarados en la clase, por que no se hace automáticamente
     path('productos', ProductosView.as_view({
         "get": "list",
-        "post": "create",
-        # "delete": "destroy"
-    }))
+        "post": "create"
+    })),
+    path('producto/<id>', ProductoView.as_view({
+        "get":"retrieve",
+        "delete": "destroy"
+    })),
 ]
