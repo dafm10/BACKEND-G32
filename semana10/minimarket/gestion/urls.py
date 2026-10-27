@@ -9,6 +9,7 @@ urlpatterns = [
     # En las viewSet se tiene que enlazar los verbos http (GET, POST, PUT, DELETE) con los métodos declarados en la clase, por que no se hace automáticamente
     path('productos', ProductosView.as_view({
         "get": "list",
-        "post": "create"
+        "post": "create",
+        # "delete": "destroy"
     }))
 ]

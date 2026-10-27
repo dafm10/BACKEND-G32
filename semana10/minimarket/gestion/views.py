@@ -16,6 +16,7 @@ from rest_framework.generics import (CreateAPIView, # crear
 from rest_framework.viewsets import ViewSet
 from .models import Categoria, Producto
 from .serializers import CategoriaSerializer, ProductoSerializer
+from uuid import UUID
 
 class CategoriasView(APIView):
     # Al usar una APIView esto es muy similar al Resource de flask-restful en el cual se puede colocar los métodos HTTP como métodos de la clase
@@ -123,6 +124,15 @@ class DevolverActualizarEliminarCategoriaView(RetrieveUpdateDestroyAPIView):
 class ProductosView(ViewSet):
     def create(self, request: Request):
         serializador = ProductoSerializer(data=request.data)
+        # Validar si la categoría enviada no ha sido eliminada, si esta eliminada entonces no proceder con la creación del producto
+        categoriaEncontrada = Categoria.objects.filter(id = request.data.get("categoria"), eliminado = False).first()
+
+        if not categoriaEncontrada:
+            return Response(data={
+                "message": "Error al crear el producto",
+                "content": "Categoría no existe"
+            },status=status.HTTP_400_BAD_REQUEST)
+
         if serializador.is_valid():
             serializador.save()
 
@@ -136,5 +146,49 @@ class ProductosView(ViewSet):
                 "content": serializador.errors
             },status=status.HTTP_400_BAD_REQUEST)
 
-    def list(self, request):
-        pass
+    def list(self, request: Request):
+        # Al usar el get en un query_params solamente retornará la primera información del query_param, es decir, si se envia una lista de varios valores, solamente tomará el primero, en cambio el getlist obtiene todos los valores y los retorna en formato de lista, para poder ser iterables
+        categoria = request.query_params.getlist('categoria')
+        nombre = request.query_params.get('nombre')
+
+        filtros = {
+            "eliminado": False
+        }
+        if categoria:
+            filtros["categoria"] = []
+
+            for categoriaId in categoria:
+                # Acá hacemos la validación si el id de la categoría es UUID válido, para evitar algún error pero del lado de la BD
+                try:
+                    UUID(categoriaId)
+                except:
+                    return Response(data={
+                        "message": f"El id de la categoría {categoriaId} es inválido"
+                    })
+                
+                categoriaEncontrada = Categoria.objects.filter(id = categoriaId, eliminado = False).first()
+                if categoriaEncontrada:
+                    filtros["categoria"].append(str(categoriaEncontrada.id))
+
+        if nombre:
+            # en SQL al usar el % en una búsqueda de LIKE o ILIKE estamos indicando que nos interesa que caracteres vienen antes o vienen despupés
+            filtros["nombre"] = '%'+nombre+'%' # la sumatoria cuando son string se vuelve concatenación
+
+        print(filtros)
+        productos = Producto.objects.filter(eliminado = False).all()
+        serializador = ProductoSerializer(instance=productos, many=True)
+        return Response(data = {
+            "content": serializador.data
+        })
+
+    # def destroy(self, request, id):
+    #     productoEncontrado = Producto.objects.filter(eliminado = False, id = id).first()
+    #     if not productoEncontrado:
+    #         return Response(data={
+    #             "message": "Producto no encontrado"
+    #         }, status=status.HTTP_404_NOT_FOUND)
+
+    #     productoEncontrado.eliminado = True
+    #     productoEncontrado.save()
+
+    #     return Response(data=None, status=status.HTTP_204_NO_CONTENT)
