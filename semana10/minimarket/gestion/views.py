@@ -14,9 +14,13 @@ from rest_framework.generics import (CreateAPIView, # crear
                                      RetrieveUpdateDestroyAPIView, # devolver solo uno y además poder actualizarlo o eliminarlo
                                      UpdateAPIView) # actualizar
 from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import api_view # en caso solo querramos usar un método en particular
 from .models import Categoria, Producto
-from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer
+from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer, GenerarUrlAWSSerializer
 from uuid import UUID
+from os import getenv
+from boto3 import client
+from urllib.parse import unquote # para hacer que la url enviada por AWS no sea modificada en bruno o urls que queremos devolver desde django
 
 class CategoriasView(APIView):
     # Al usar una APIView esto es muy similar al Resource de flask-restful en el cual se puede colocar los métodos HTTP como métodos de la clase
@@ -217,3 +221,35 @@ class ProductoView(ViewSet):
         productoEncontrado.save()
 
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(http_method_names=['POST'])
+def crearUrlParaSubirArchivo(request: Request):
+    # https://docs.aws.amazon.com/boto3/latest/guide/s3-presigned-urls.html
+    # https://docs.aws.amazon.com/boto3/latest/reference/services/s3/client/generate_presigned_url.html
+    serializador = GenerarUrlAWSSerializer(data=request.data)
+    if serializador.is_valid():
+        fileName = serializador.validated_data.get("fileName")
+        ext = serializador.validated_data.get("ext")
+        contentType = serializador.validated_data.get("contentType")
+        folder = serializador.validated_data.get("folder", "/")
+
+        s3 = client('s3')
+        
+        url = s3.generate_presigned_url(
+            ClientMethod = 'put_object',
+            Params ={
+                "Bucket":getenv('BUCKET_NAME'),
+                "Key": folder + fileName + ext,
+                "ContentType": contentType
+            },
+            ExpiresIn=150
+        )
+        return Response(data={
+            "content": unquote(url)
+        })
+    else:
+        return Response(data={
+            "message": "Error al generar la URL",
+            "content": serializador.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
