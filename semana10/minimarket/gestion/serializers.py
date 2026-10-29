@@ -1,7 +1,7 @@
 # ModelSerializer se vincula con el modelo y trae todas las configuraciones del Modelo
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework import serializers
-from .models import Categoria, Producto
+from .models import Categoria, Producto, Media
 
 class CategoriaSerializer(ModelSerializer):
     class Meta:
@@ -44,3 +44,9 @@ class GenerarUrlAWSSerializer(Serializer):
     # El valor máximo 10mb y el mínimo 5kb
     size = serializers.FloatField(max_value=10*1024*1024, min_value= 5*1024, required=True)
     folder = serializers.CharField(required=False)
+
+
+class MediaSerializer(ModelSerializer):
+    class Meta:
+        model = Media
+        fields = '__all__'

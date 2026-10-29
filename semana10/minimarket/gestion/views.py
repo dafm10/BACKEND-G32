@@ -16,8 +16,8 @@ from rest_framework.generics import (CreateAPIView, # crear
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import api_view # en caso solo querramos usar un método en particular
 from .models import Categoria, Producto
-from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer, GenerarUrlAWSSerializer
-from uuid import UUID
+from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer, GenerarUrlAWSSerializer, MediaSerializer
+from uuid import UUID, uuid4
 from os import getenv
 from boto3 import client
 from urllib.parse import unquote # para hacer que la url enviada por AWS no sea modificada en bruno o urls que queremos devolver desde django
@@ -187,6 +187,24 @@ class ProductosView(ViewSet):
         print(filtros)
         # al usar el ** en un método y ese sea un diccionario estos indican que las llaves del diccionario se convierten a parámetro y sus valores se convertirán a valores de los parámetros, es decir data= {"nombre": "Eduardo"} > **data > (nombre="Eduardo")
         productos = Producto.objects.filter(**filtros).all()
+
+        # Agregamos la forma para devolver una url de visualización de la imagen si el producto lo tiene
+        for producto in productos:
+            print(producto.media)
+            if producto.media:
+                key = producto.media.ruta + producto.media.nombre + '.' + producto.media.ext
+                s3 = client('s3')
+                url = s3.generate_presigned_url(
+                    ClientMethod = 'get_object', # Obtener
+                    Params = {
+                        "Bucket": getenv('BUCKET_NAME'),
+                        "Key": key
+                    },
+                    ExpiresIn=30
+                )
+                print(url)
+                # TODO: modificar el serializador para poder agregar la ruta en vez de la propiedad media
+
         serializador = ProductoSerializer(instance=productos, many=True)
         return Response(data = {
             "content": serializador.data
@@ -235,21 +253,48 @@ def crearUrlParaSubirArchivo(request: Request):
         folder = serializador.validated_data.get("folder", "/")
 
         s3 = client('s3')
+        nombre = str(uuid4()) + '_' + fileName
         
         url = s3.generate_presigned_url(
             ClientMethod = 'put_object',
             Params ={
                 "Bucket":getenv('BUCKET_NAME'),
-                "Key": folder + fileName + ext,
+                "Key": folder + nombre + '.' + ext,
                 "ContentType": contentType
             },
             ExpiresIn=150
         )
         return Response(data={
-            "content": unquote(url)
+            "content": {
+                "url": unquote(url),
+                "nombre": nombre,
+                "ext": ext,
+                "mimeType": contentType,
+                "ruta": folder
+            }
         })
     else:
         return Response(data={
             "message": "Error al generar la URL",
+            "content": serializador.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(http_method_names=['POST'])
+def crearMedia(request:Request):
+    serializador = MediaSerializer(data = request.data)
+    if serializador.is_valid():
+        serializador.save()
+
+        return Response(data={
+            "message": "Archivo creado exitosamente",
+            "content": {
+                "id": serializador.data.get("id")
+            }
+        }, status=status.HTTP_201_CREATED)
+    
+    else:
+        return Response(data={
+            "message": "Error al crear el archivo",
             "content": serializador.errors
         }, status=status.HTTP_400_BAD_REQUEST)
