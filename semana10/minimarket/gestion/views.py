@@ -203,9 +203,10 @@ class ProductosView(ViewSet):
                     ExpiresIn=30
                 )
                 print(url)
-                # TODO: modificar el serializador para poder agregar la ruta en vez de la propiedad media
+                # Agrego a la instancia de producto un nuevo atributo llamado url que hará match con el atributo del serializador
+                producto.url = url
 
-        serializador = ProductoSerializer(instance=productos, many=True)
+        serializador = ProductoSerializer(instance = productos, many=True)
         return Response(data = {
             "content": serializador.data
         })
