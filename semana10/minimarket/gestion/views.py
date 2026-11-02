@@ -15,8 +15,8 @@ from rest_framework.generics import (CreateAPIView, # crear
                                      UpdateAPIView) # actualizar
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import api_view # en caso solo querramos usar un método en particular
-from .models import Categoria, Producto
-from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer, GenerarUrlAWSSerializer, MediaSerializer
+from .models import Categoria, Producto, Media, Precio
+from .serializers import CategoriaSerializer, ProductoSerializer, ProductoDetalleSerializer, GenerarUrlAWSSerializer, MediaSerializer, PrecioSerializer
 from uuid import UUID, uuid4
 from os import getenv
 from boto3 import client
@@ -138,7 +138,23 @@ class ProductosView(ViewSet):
             },status=status.HTTP_400_BAD_REQUEST)
 
         if serializador.is_valid():
-            serializador.save()
+            # Al momento de agregar nueva información a mi instancia de mi clase tengo que guardar esa información en una variable para luego poder alterarla, si no las modificaciones que haga no se podrá visualizar
+            nuevoProducto = serializador.save()
+            media = serializador.validated_data.get('media')
+            if media:
+                # mediaEncontrada = Media.objects.filter(id = UUID()).first()
+                # cuando se guarda el nuevo producto en la BD el método is_valid también se encarga de hacer la validación de que exista las relaciones y asi mismo reemplaza las llaves por las instancias correspondientes
+                key = media.ruta + media.nombre + '.' + media.ext
+                s3 = client('s3')
+                url = s3.generate_presigned_url(
+                    ClientMethod = 'get_object', # Obtener
+                    Params = {
+                        "Bucket": getenv('BUCKET_NAME'),
+                        "Key": key
+                    },
+                    ExpiresIn=30
+                )
+                nuevoProducto.url = url
 
             return Response(data={
                 "message": "Producto creado exitosamente",
@@ -190,7 +206,6 @@ class ProductosView(ViewSet):
 
         # Agregamos la forma para devolver una url de visualización de la imagen si el producto lo tiene
         for producto in productos:
-            print(producto.media)
             if producto.media:
                 key = producto.media.ruta + producto.media.nombre + '.' + producto.media.ext
                 s3 = client('s3')
@@ -299,3 +314,42 @@ def crearMedia(request:Request):
             "message": "Error al crear el archivo",
             "content": serializador.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PreciosView(APIView):
+    def post(self, request: Request):
+        # 1. Verificar si el producto no tiene un precio habilitado
+        # 2. Si tiene un precio habilitado y este nuevo precio a crear viene con la opción de habilitado en True, entonces deshabilitar el anterior precio y crear este precio
+        # 3. Si no tiene la opción de habilitado en True no hacer la validación y crearlo
+        # 4. OPCIONAL: si es un precio totalmente nuevo para este producto (o sea no ha tenido precio anterior) entonces no validar nada
+        # AGREGAR VALIDACIÓN PARA QUE SOLAMENTE AGREGUE UN PRECIO A UN PRODUCTO QUE NO ESTÉ ELIMINADO
+        serializador = PrecioSerializer(data = request.data)
+        productoEliminado = Producto.objects.filter(id = serializador.initial_data.get('producto'), eliminado = True).first()
+        if productoEliminado:
+            return  Response(data={
+                "message": "Producto no existe"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        precioDelProducto = Precio.objects.filter(producto = serializador.initial_data.get('producto')).first()
+
+        if serializador.is_valid():
+            # validated_data se usa siempre despues de "is_valid()"
+            habilitado = serializador.validated_data.get("habilitado", True)
+            # Primedo hace la validación si existe el precio del producto y luego si está habilitado y luego si el nuevo precio va. aestar habilitado, caso contrario si falla la primera condicion no continuará a las siguientes
+            if precioDelProducto and precioDelProducto.habilitado and habilitado:
+                # Significa que ya hay un precio habilitado y queremos poner un nuevo precio también habilitado, entonces tenemos que deshabilitar el antigup
+                precioDelProducto.habilitado = False
+                precioDelProducto.save()
+            # Si alguno de los precios no está habilitado o ninguno lo está igual procederé con el guardado de la información
+            serializador.save()
+
+            return Response(data={
+                "message": "Precio credo exitosamente",
+                "content": serializador.data
+            }, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response(data={
+                "message": "Error al crear el precio",
+                "content": serializador.errors
+            }, status=status.HTTP_400_BAD_REQUEST)

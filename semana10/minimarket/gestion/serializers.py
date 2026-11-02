@@ -1,7 +1,7 @@
 # ModelSerializer se vincula con el modelo y trae todas las configuraciones del Modelo
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework import serializers
-from .models import Categoria, Producto, Media
+from .models import Categoria, Producto, Media, Precio
 
 class CategoriaSerializer(ModelSerializer):
     class Meta:
@@ -59,3 +59,8 @@ class MediaSerializer(ModelSerializer):
     class Meta:
         model = Media
         fields = '__all__'
+
+class PrecioSerializer(ModelSerializer):
+    class Meta:
+        model = Precio
+        exclude = ['eliminado']
