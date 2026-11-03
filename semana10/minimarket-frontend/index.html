@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimarket · Gestión de Productos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Minimarket</h1>
+    <p>Gestión de productos con foto</p>
+  </header>
+
+  <main class="app-main">
+    <section class="panel">
+      <h2>Nuevo producto</h2>
+      <form id="form-producto" class="form-producto">
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" required maxlength="200" placeholder="Ej: Leche Gloria 1L" />
+        </div>
+
+        <div class="campo">
+          <label for="categoria">Categoría</label>
+          <div class="fila-categoria">
+            <select id="categoria" name="categoria" required>
+              <option value="" disabled selected>Selecciona una categoría</option>
+            </select>
+          </div>
+        </div>
+
+        <details class="nueva-categoria">
+          <summary>¿No existe la categoría? Crear una nueva</summary>
+          <div class="fila-categoria">
+            <input type="text" id="nueva-categoria-nombre" placeholder="Nombre de la nueva categoría" maxlength="100" />
+            <button type="button" id="btn-crear-categoria">Agregar categoría</button>
+          </div>
+        </details>
+
+        <div class="campo campo-checkbox">
+          <label for="disponible">
+            <input type="checkbox" id="disponible" name="disponible" checked />
+            Disponible
+          </label>
+        </div>
+
+        <div class="campo">
+          <label for="imagen">Foto del producto (png / jpg, máx. 10MB)</label>
+          <input type="file" id="imagen" name="imagen" accept="image/png,image/jpeg" />
+          <img id="preview-imagen" class="preview-imagen" alt="Vista previa" hidden />
+        </div>
+
+        <button type="submit" id="btn-guardar">Crear producto</button>
+
+        <p id="mensaje-formulario" class="mensaje" role="status"></p>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Productos</h2>
+        <button type="button" id="btn-recargar">Recargar</button>
+      </div>
+
+      <div class="filtros">
+        <input type="text" id="filtro-nombre" placeholder="Buscar por nombre..." />
+        <select id="filtro-categoria">
+          <option value="">Todas las categorías</option>
+        </select>
+        <button type="button" id="btn-filtrar">Filtrar</button>
+      </div>
+
+      <p id="mensaje-lista" class="mensaje" role="status"></p>
+      <div id="lista-productos" class="lista-productos"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
