@@ -9,8 +9,8 @@ from rest_framework.permissions import (IsAuthenticated, # Obligará a que si no
                                         AllowAny # Permitirá que cualquiera pueda consultar cualquier método, sin la necesidad de enviar una token, esto es el valor prederterminado
                                         )
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .serializers import UsuarioSerializer, LoginSerializer
-from .models import Usuario
+from .serializers import UsuarioSerializer, LoginSerializer, DoctorSerializer, PacienteSerializer
+from .models import Usuario, Doctor, Paciente
 
 @api_view(http_method_names=['POST'])
 def registroUsuario(request: Request):
@@ -82,7 +82,71 @@ def perfilUsuario(request: Request):
     print(request.user) # retorna la instancia que le pertenece al usuario
 
     usuarioActual = request.user
-
+    serializador = UsuarioSerializer(instance = usuarioActual)
     return Response(data={
-        "content": ""
+        "content": serializador.data
     })
+
+@api_view(http_method_names=['POST'])
+@permission_classes([IsAuthenticated])
+def configurarDoctor(request: Request):
+    # la info del usuario viene en request.user
+    # 1. Validar si el usuario existe
+    usuarioExiste = Usuario.objects.filter(id = request.user.id).first()
+    if not usuarioExiste:
+        return Response(data={
+            "message": "El usuario no existe"
+        }, status=status.HTTP_404_NOT_FOUND)
+    # 2. Un usuario no puede ser doctor y paciente, entonces validar que este usuario no sea paciente, si lo es no se debe continuar
+    pacienteUsuario = Paciente.objects.filter(usuario = usuarioExiste.id).first()
+    if pacienteUsuario:
+        return Response(data={
+            "message": "El usuario ya es un paciente"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    # 3. Guardar la información del doctor
+    # Agregamos el ID del usuario proveniente del JWT a el ID del usuario que usará el doctor en el registro
+    request.data['usuario'] = usuarioExiste.id
+    serializador = DoctorSerializer(data = request.data)
+    if serializador.is_valid():
+        serializador.save()
+
+        return Response(data={
+            "message": "Doctor creado exitosamente", 
+            "content": serializador.data
+        }, status=status.HTTP_201_CREATED)
+    else:
+        return Response(data={
+            "message": "Error al crear el registro",
+            "content": serializador.errors
+        },status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+@api_view(http_method_names=['POST'])
+@permission_classes([IsAuthenticated])
+def configurarPaciente(request: Request):
+    usuarioExiste = Usuario.objects.filter(id = request.user.id).first()
+    if not usuarioExiste:
+        return Response(data={
+            "message": "El usuario no existe"
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    doctorUsuario = Doctor.objects.filter(usuario = usuarioExiste.id).first()
+    if doctorUsuario:
+        return Response(data={
+            "message": "El usuario ya es un doctor"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    request.data['usuario'] = usuarioExiste.id
+    serializador = PacienteSerializer(data = request.data)
+    if serializador.is_valid():
+        serializador.save()
+        return Response(data={
+            "message": "Paciente creado exitosamente",
+            "content": serializador.data
+        },status=status.HTTP_201_CREATED)
+    else:
+        return Response(data={
+            "message": "Error al crear paciente",
+            "content": serializador.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
