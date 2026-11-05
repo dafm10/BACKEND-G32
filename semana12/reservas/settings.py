@@ -138,3 +138,17 @@ MAILERS = {
 
 # Indica a Django cual será la nueva tabla que se usará como referencia para reemplazar el auth_user
 AUTH_USER_MODEL = 'gestion.Usuario'
+
+# Esta variable sirve para configurar opciones adicionales a la libreria de Django Rest-Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=3, minutes=30),
+    "SIGNING_KEY": getenv("JWT_SECRET")
+}
