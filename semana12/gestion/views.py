@@ -9,8 +9,11 @@ from rest_framework.permissions import (IsAuthenticated, # Obligará a que si no
                                         AllowAny # Permitirá que cualquiera pueda consultar cualquier método, sin la necesidad de enviar una token, esto es el valor prederterminado
                                         )
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .serializers import UsuarioSerializer, LoginSerializer, DoctorSerializer, PacienteSerializer
-from .models import Usuario, Doctor, Paciente
+from .serializers import UsuarioSerializer, LoginSerializer, DoctorSerializer, PacienteSerializer, EspecialidadSerializer
+from .models import Usuario, Doctor, Paciente, Especialidad
+from .pagination import PaginacionEstandar
+# Saber cuantas consultas se hacen a la BD
+from django.db import connection, reset_queries
 
 @api_view(http_method_names=['POST'])
 def registroUsuario(request: Request):
@@ -150,3 +153,53 @@ def configurarPaciente(request: Request):
             "message": "Error al crear paciente",
             "content": serializador.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EspecialidadesView(APIView):
+    def get(self, request: Request):
+        # Reinicia toda la cola de consultas que se ha realizado, para evitar que en el for se puedan mostrar consultas pasadas y confunda la data
+        reset_queries()
+
+        nombre = request.query_params.get('nombre')
+
+        # Django no obtiene de manera automática los registros, por que el queryset (búsqueda de los registros en la BD) es perezoso (lazy load), Django solamente obtiene la información de la BD hasta usar los datos
+        especialidades = Especialidad.objects.all()
+        paginador = PaginacionEstandar()
+
+        if nombre:
+            # ILIKE
+            # strip() quitar los espacios al inicio y al final
+            # al momento de agregar un filtro adicional a una query previamente definida tenemos que sobre escribir la instancia previa para que surga efecto, por que si solamente le agregamoe el fitro entonces no se agregará a la instancia previa
+            especialidades = especialidades.filter(nombre__icontains = nombre.strip())
+
+        # Le pasamos la información que va a utilizar para poder obtener los registros de la BD, así mismo le pasamos el request en el cual contendrá los query_params para poder hacer la paginación y le pasamos la vista en el caso que estemos utilizando templates para que esta pueda ser renderizada sin problema, en nuestro caso no es necesario esa información
+        resultado = paginador.paginate_queryset(especialidades, request, view=self)
+        serializador = EspecialidadSerializer(instance = resultado, many=True)
+
+        print(resultado)
+
+        # Convertirá la información proveída de la consulta a la BD y la serializará de manera correcta antes de poder retornarla al cliente
+        respuesta = paginador.get_paginated_response(serializador.data)
+
+        # For para debug en el cual solo se usa cuando queremos validar cuántas y que consultas se están realizando en la BD en determinado endpoint
+        for consulta in connection.queries:
+            # Imprime todas las consultas que se realizan en la BD
+            print(consulta["sql"])
+
+        return respuesta
+
+    def post(self, request: Request):
+        serializador = EspecialidadSerializer(data = request.data)
+        
+        if serializador.is_valid():
+            serializador.save()
+
+            return Response(data={
+                "message": "Especialidad creada exitosamente",
+                "content": serializador.data
+            },status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={
+                "message": "Error al crear la especialidad",
+                "content": serializador.errors
+            },status=status.HTTP_400_BAD_REQUEST)
