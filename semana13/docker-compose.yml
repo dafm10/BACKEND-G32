@@ -17,7 +17,7 @@ services:
         # service_healthy > indica que si el servicio se ha levantado "sanamente", recién se levantará el api
         condition: service_healthy
   
-  db:
+  base_de_datos:
     # image es por si no vamos a utilizar el Dockerfile y si usaremos una imagen
     image: postgres:18
     env_file: .env

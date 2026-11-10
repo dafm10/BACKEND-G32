@@ -5,6 +5,10 @@ docker images                       > Muestra las imagenes que tenemos instalado
 docker ps                           > Muestra todos los contenedores en ejecución
 docker ps -a                        > Muestra todos los contenedores en ejecución o inactivos
 docker rm CONTENEDOR_ID | NOMBRE    > Elimina ese contenedor y toda la data se perderá a no ser que se use un volumen
+docker compose build --no-cache     > Genera la creación de contenedores en base al archivo docker-compose y este lee la configuración del Dockerfile
+
+docker compose run --rm /RUTA/NOMBRE_CONTENEDOR COMANDO    > Comando para ejecutar algún comando dentro del contenedor seleccionado
+docker compose run --rm /app/manage.py startapp gestion
 
 En powershell y terminales de macOS y linux, funciona el comodín $(pwd) mientras que en CMD funciona %cd%
 docker run --rm -v "$(pwd):/app" -w /app python:3.13-slim python SCRIPT.PY
