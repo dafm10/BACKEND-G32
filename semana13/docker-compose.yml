@@ -16,6 +16,8 @@ services:
       base_de_datos:
         # service_healthy > indica que si el servicio se ha levantado "sanamente", recién se levantará el api
         condition: service_healthy
+      redis:
+        condition: service_healthy
   
   base_de_datos:
     # image es por si no vamos a utilizar el Dockerfile y si usaremos una imagen
@@ -34,7 +36,22 @@ services:
       timeout: 3s
       retries: 10
       # start_period: 30s. Esto es opcional
+    
+  redis:
+    image: redis:8.10
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redisdata:/data"
+    healthcheck:
+      # En Docker CMD-SHELL solo toma el segundo elemento de la lista como el comando completo a ejecutar, si queremos ejecutar CMD-SHELL el comando seria en dos pasos
+      # test: ["CMD-SHELL", "redis-cli" PING"]
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 # Si en nuestro docker-compose tenemos algún contenedor que almacene data y esta puede perderse al eliminar el contenedor, se recomienda agregar la etiqueta volumes, para que, si se elimina el contenedor, esta información quede almacenada de manera segura en docker y pueda ser leída posteriormente cunado se vuelva a crear el contenedor
 volumes:
   pgdata:
+  redisdata:

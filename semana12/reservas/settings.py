@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 from os import getenv
+from datetime import timedelta
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -146,7 +146,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
+
 # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=3, minutes=30),

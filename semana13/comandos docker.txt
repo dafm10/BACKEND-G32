@@ -13,6 +13,10 @@ docker compose run --rm /app/manage.py startapp gestion
 En powershell y terminales de macOS y linux, funciona el comodín $(pwd) mientras que en CMD funciona %cd%
 docker run --rm -v "$(pwd):/app" -w /app python:3.13-slim python SCRIPT.PY
 docker run --rm -v "%cd%:/app" -w /app python:3.13-slim python SCRIPT.PY
+docker run --name redis-prueba -p 6379:6379 redis       > levantará nuestro servidor redis usando docker
 
+docker start NOMBRE_CONTENEDOR                  > Inicializo los contenedores que tengo creados pero que están en hibernación
+docker stop NOMBRE_CONTENEDOR                   > Detengo el contenedor que está levantado
+docker exec -it NOMBRE_CONTENEDOR_LEVANTADO     > Ejecuto el comando  en el contenedor, el contenedor debe estar levantado (start)
 
 Dockerfile.- es un documento que me sirve para poder crear mi contenedor con una imagen como base y agregar mi proyecto
